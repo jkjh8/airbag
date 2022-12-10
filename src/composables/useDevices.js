@@ -3,10 +3,18 @@ const devices = ref([])
 
 const getDevices = async () => {
   if (!navigator.mediaDevices?.enumerateDevices) {
-    console.log('enumerateDevices() not supported.')
+    FN.onRequest({
+      command: 'log',
+      leval: 'error',
+      message: 'enumerateDevices() not supported.'
+    })
   } else {
     devices.value = await navigator.mediaDevices.enumerateDevices()
-    console.log(devices.value)
+    FN.onRequest({
+      command: 'log',
+      leval: 'info',
+      message: 'get audio devices'
+    })
   }
 }
 

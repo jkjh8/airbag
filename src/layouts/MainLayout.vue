@@ -1,12 +1,34 @@
 <script setup>
+import { onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { getDevices } from 'src/composables/useDevices.js'
+import { updateSetup } from 'src/composables/useSetup.js'
 import ControlBtns from 'src/components/ControlBtns.vue'
 import AboutWindow from 'src/components/dialogs/aboutDialog.vue'
 
 const $q = useQuasar()
-getDevices()
+
 $q.dark.set(true)
+
+onMounted(async () => {
+  await getDevices()
+  FN.onResponse((args) => {
+    console.log(args)
+    switch (args.type) {
+      case 'setup':
+        updateSetup(args.value)
+        break
+      default:
+        FN.onRequset({
+          command: 'log',
+          level: 'info',
+          message: 'unknown message from backend'
+        })
+        break
+    }
+  })
+  FN.onRequest({ command: 'start' })
+})
 </script>
 
 <template>

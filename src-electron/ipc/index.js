@@ -1,15 +1,37 @@
 import { BrowserWindow as bw, ipcMain, dialog } from 'electron'
 import logger from '../logger'
+
+import writeFrontLog from './functions/writeFrontendLog'
+import { getSetupFromDB, setSetupToDB } from './functions/setup'
+import { createServer } from '../net/udp'
+
+let setup
+
 ipcMain.on('onRequest', async (e, args) => {
   try {
     switch (args.command) {
+      // STARTING
+      case 'start':
+        setup = await getSetupFromDB()
+        try {
+          await createServer(setup.port)
+        } catch (err) {
+          logger.error(`server creation failed: ${err}`)
+        }
+
+        break
       // LOG MESSAGE FROM FRONTEND
       case 'log':
-        if (args.level === 'error') {
-          logger.error(args.message)
-        } else {
-          logger.info(args.message)
-        }
+        writeFrontLog(args)
+        break
+
+      // GET SETUP
+      case 'getSetup':
+        setup = await getSetupFromDB()
+        break
+      // SET SETUP
+      case 'setSetup':
+        await setSetupToDB(args.value)
         break
       // GET AUDIO FILE PATH
       case 'getFilePath':
