@@ -1,11 +1,12 @@
 <script setup>
-import { useQuasar } from "quasar";
-import ControlBtns from "src/components/ControlBtns.vue";
-import AboutWindow from "src/components/dialogs/aboutDialog.vue";
+import { useQuasar } from 'quasar'
+import { getDevices } from 'src/composables/useDevices.js'
+import ControlBtns from 'src/components/ControlBtns.vue'
+import AboutWindow from 'src/components/dialogs/aboutDialog.vue'
 
-const $q = useQuasar();
-
-$q.dark.set(true);
+const $q = useQuasar()
+getDevices()
+$q.dark.set(true)
 </script>
 
 <template>
