@@ -1,8 +1,9 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onBeforeMount, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { getDevices } from 'src/composables/useDevices.js'
 import { updateSetup } from 'src/composables/useSetup.js'
+import { updatePlayer } from 'src/composables/usePlayer.js'
 import ControlBtns from 'src/components/ControlBtns.vue'
 import AboutWindow from 'src/components/dialogs/aboutDialog.vue'
 
@@ -10,16 +11,16 @@ const $q = useQuasar()
 
 $q.dark.set(true)
 
-onMounted(async () => {
+onBeforeMount(async () => {
   await getDevices()
+  updatePlayer(await FN.onPromise({ command: 'getPlayer' }))
   FN.onResponse((args) => {
-    console.log(args)
     switch (args.type) {
       case 'setup':
         updateSetup(args.value)
         break
       default:
-        FN.onRequset({
+        FN.onRequest({
           command: 'log',
           level: 'info',
           message: 'unknown message from backend'
@@ -33,7 +34,7 @@ onMounted(async () => {
 
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="text-grey-2" style="background: #00000000">
+    <q-header class="text-grey-2" style="background: #000000">
       <q-toolbar class="row justify-between">
         <div class="q-pa-sm q-gutter-x-md row items-center">
           <q-avatar class="pointer" color="green" size="24px">A </q-avatar>

@@ -8,5 +8,8 @@ contextBridge.exposeInMainWorld('FN', {
     ipcRenderer.on('onResponse', (event, ...args) => {
       fn(...args)
     })
+  },
+  onPromise: async (args) => {
+    return await ipcRenderer.invoke('onPromise', { ...args })
   }
 })

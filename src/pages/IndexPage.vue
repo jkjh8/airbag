@@ -1,17 +1,18 @@
 <script setup>
+import { ref } from 'vue'
 import PlayerComponent from '/src/components/playerComponent'
 import { player } from 'src/composables/usePlayer.js'
+
+const audioplayer = ref([])
 </script>
 
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md q-gutter-y-sm">
     <PlayerComponent
-      :id="1"
-      :file1="player[0].file1"
-      :file2="player[0].file2"
-      :file3="player[0].file3"
-      :deviceId="player[0].deviceId"
-      :playlink="player[0].playlink"
+      v-for="(item, index) in player"
+      ref="audioplayer"
+      :key="index"
+      :id="index"
     />
   </q-page>
 </template>

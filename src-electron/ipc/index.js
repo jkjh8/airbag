@@ -4,6 +4,7 @@ import logger from '../logger'
 import writeFrontLog from './functions/writeFrontendLog'
 import { getSetupFromDB, setSetupToDB } from './functions/setup'
 import { setDevice } from './functions/devices'
+import { updatePlayer, getPlayer } from './functions/player'
 import { createServer } from '../net/udp'
 import db from '../db'
 
@@ -20,13 +21,18 @@ ipcMain.on('onRequest', async (e, args) => {
         } catch (err) {
           logger.error(`server creation failed: ${err}`)
         }
-
         break
       // LOG MESSAGE FROM FRONTEND
       case 'log':
         writeFrontLog(args)
         break
-
+      // GET PLAYER
+      case 'getPlayer':
+        await getPlayer()
+        break
+      case 'updatePlayer':
+        await updatePlayer(args)
+        break
       // GET SETUP
       case 'getSetup':
         setup = await getSetupFromDB()
@@ -37,7 +43,7 @@ ipcMain.on('onRequest', async (e, args) => {
         break
       // UPDATE DEVICE
       case 'setDevice':
-        setDevice(args)
+        await setDevice(args)
         break
       // GET AUDIO FILE PATH
       case 'getFilePath':
@@ -58,5 +64,11 @@ ipcMain.on('onRequest', async (e, args) => {
     }
   } catch (err) {
     logger.error(`IPC request data error: ${err}`)
+  }
+})
+
+ipcMain.handle('onPromise', async (e, args) => {
+  if (args.command === 'getPlayer') {
+    return await getPlayer()
   }
 })
