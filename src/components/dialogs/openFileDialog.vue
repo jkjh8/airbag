@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useQuasar, useDialogPluginComponent } from 'quasar'
-import { setup } from 'src/composables/useSetup'
 import {
   required,
   minPort,
@@ -12,10 +11,7 @@ import {
 const emit = defineEmits([...useDialogPluginComponent.emits])
 const { dialogRef, onDialogOK, onDialogCancel } = useDialogPluginComponent()
 
-onMounted(() => {
-  console.log('getSetup')
-  FN.onRequest({ command: 'getSetup' })
-})
+onMounted(() => {})
 
 const onSubmit = () => {
   onDialogOK(setup.value)
@@ -33,7 +29,7 @@ const onSubmit = () => {
       </q-card-section>
 
       <q-card-section>
-        <div>시스템 전체 전원을 ON/OFF 합니다.</div>
+        <div></div>
       </q-card-section>
 
       <q-card-actions class="row no-wrap" align="right">

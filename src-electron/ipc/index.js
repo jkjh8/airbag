@@ -3,7 +3,9 @@ import logger from '../logger'
 
 import writeFrontLog from './functions/writeFrontendLog'
 import { getSetupFromDB, setSetupToDB } from './functions/setup'
+import { setDevice } from './functions/devices'
 import { createServer } from '../net/udp'
+import db from '../db'
 
 let setup
 
@@ -32,6 +34,10 @@ ipcMain.on('onRequest', async (e, args) => {
       // SET SETUP
       case 'setSetup':
         await setSetupToDB(args.value)
+        break
+      // UPDATE DEVICE
+      case 'setDevice':
+        setDevice(args)
         break
       // GET AUDIO FILE PATH
       case 'getFilePath':

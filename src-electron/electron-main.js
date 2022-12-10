@@ -50,10 +50,13 @@ function createWindow() {
 }
 
 app.on('ready', () => {
-  protocol.registerFileProtocol('localFile', (req, cb) => {
-    cb({
-      path: req.url
-    })
+  protocol.registerFileProtocol('local', (request, callback) => {
+    const pathname = decodeURIComponent(request.url.replace('local://', ''))
+    try {
+      callback(pathname)
+    } catch (error) {
+      logger.error('file protocol faild' + error)
+    }
   })
   createWindow()
   logger.info('APP Start')

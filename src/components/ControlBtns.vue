@@ -2,6 +2,7 @@
 import { useQuasar } from 'quasar'
 import TooltipDelay from 'src/components/TooltipDelay.vue'
 import SetupDialog from 'src/components/dialogs/setupDialog.vue'
+import AudioFileDialog from 'src/components/dialogs/openFileDialog.vue'
 
 const $q = useQuasar()
 
@@ -11,6 +12,12 @@ const openSetupDialog = () => {
   }).onOk((args) => {
     console.log(args)
     FN.onRequest({ command: 'setSetup', value: { ...args } })
+  })
+}
+
+const openFileDialog = () => {
+  $q.dialog({
+    component: AudioFileDialog
   })
 }
 </script>
@@ -28,7 +35,14 @@ const openSetupDialog = () => {
       <TooltipDelay msg="Setting" />
     </q-btn>
 
-    <q-btn icon="folder" color="yellow" round flat dense>
+    <q-btn
+      icon="folder"
+      color="yellow"
+      round
+      flat
+      dense
+      @click="openFileDialog"
+    >
       <TooltipDelay msg="Audio Files" />
     </q-btn>
 
