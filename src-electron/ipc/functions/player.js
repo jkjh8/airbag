@@ -17,6 +17,14 @@ export const getPlayers = async () => {
   return await db.find({ type: 'player' }).sort({ id: 1 })
 }
 
+export const updatePlaylink = async (id, value) => {
+  await db.update(
+    { type: 'player', id: id },
+    { $set: { playlink: value } },
+    { upsert: true }
+  )
+}
+
 // db.remove({}, { multi: true }, function (err, result) {
 //   console.log('removed')
 // })

@@ -4,7 +4,7 @@ import logger from '../logger'
 import writeFrontLog from './functions/writeFrontendLog'
 import { getSetupFromDB, setSetupToDB } from './functions/setup'
 import { setDevice } from './functions/devices'
-import { updatePlayer, getPlayer } from './functions/player'
+import { updatePlayer, getPlayer, updatePlaylink } from './functions/player'
 import { createServer } from '../net/udp'
 import db from '../db'
 import { getFileDialog, updateFiles } from './functions/files'
@@ -40,6 +40,9 @@ ipcMain.on('onRequest', async (e, args) => {
       // GET AUDIO FILE PATH
       case 'updateFiles':
         await updateFiles(args.id, args.files)
+        break
+      case 'updatePlaylink':
+        await updatePlaylink(args.id, args.playlink)
         break
       default:
         logger.info(args)

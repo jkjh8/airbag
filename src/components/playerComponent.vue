@@ -2,7 +2,11 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { info, warn, error } from 'src/composables/useLogs'
 import { audioOutput } from 'src/composables/useDevices.js'
-import { player, updateFileToDb } from 'src/composables/usePlayer.js'
+import {
+  player,
+  updateFileToDb,
+  updatePlaylinkToDb
+} from 'src/composables/usePlayer.js'
 
 const props = defineProps({
   id: Number
@@ -32,6 +36,11 @@ const audioPlay = (idx) => {
     error(`player id: ${props.id}, idx: ${idx} play error`)
   }
 }
+const openFile = async (idx) => {
+  files.value[idx] = await FN.onPromise({ command: 'getFilePath' })
+  audio.value[idx].src = `local://${files.value[idx]}`
+  updateFileToDb(props.id, files.value)
+}
 
 const setDevice = () => {
   setSink()
@@ -42,16 +51,15 @@ const setDevice = () => {
   })
 }
 
-const openFile = async (idx) => {
-  files.value[idx] = await FN.onPromise({ command: 'getFilePath' })
-  audio.value[idx].src = `local://${files.value[idx]}`
-  updateFileToDb(props.id, files.value)
-}
-
 const setSink = () => {
   for (let i = 0; i < 3; i++) {
     audio.value[i].setSinkId(deviceId.value)
   }
+}
+
+const setPlaylink = () => {
+  playlink.value = !playlink.value
+  updatePlaylinkToDb(props.id, playlink.value)
 }
 onMounted(async () => {
   try {
@@ -113,7 +121,7 @@ onMounted(async () => {
             ></q-btn>
           </div>
           <!-- audio tag -->
-          <audio ref="audio" controls @ended="status[index] = false" />
+          <audio ref="audio" @ended="status[index] = false" />
         </div>
 
         <q-separator class="q-my-sm" />
@@ -137,7 +145,9 @@ onMounted(async () => {
       </div>
     </q-item-section>
     <q-item-section side>
-      <q-btn :color="playlink ? 'primary' : 'grey-10'">LINK</q-btn>
+      <q-btn :color="playlink ? 'primary' : 'grey-10'" @click="setPlaylink"
+        >LINK</q-btn
+      >
     </q-item-section>
   </q-item>
 </template>

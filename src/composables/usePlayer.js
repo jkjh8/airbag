@@ -14,4 +14,8 @@ const updateFileToDb = (id, files) => {
   FN.onRequest({ command: 'updateFiles', id: id, files: [...files] })
 }
 
-export { player, updateFileToDb }
+const updatePlaylinkToDb = (id, playlink) => {
+  FN.onRequest({ command: 'updatePlaylink', id: id, playlink: playlink })
+}
+
+export { player, updateFileToDb, updatePlaylinkToDb }
