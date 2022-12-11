@@ -1,7 +1,9 @@
+import db from '../../db'
 import { dialog } from 'electron'
+import logger from '../../logger'
 
-const getFileDialog = async (args) => {
-  const file = dialog.showOpenDialog({
+const getFileDialog = async () => {
+  const file = dialog.showOpenDialogSync({
     title: 'Select Audio File',
     filters: [
       { name: 'Audio', extensions: ['wav', 'mp3'] },
@@ -9,6 +11,16 @@ const getFileDialog = async (args) => {
     ],
     properties: ['openFile']
   })
+  return file[0]
 }
 
-export { getFileDialog }
+const updateFiles = async (id, files) => {
+  await db.update(
+    { type: 'player', id: id },
+    { $set: { files: files } },
+    { upsert: true }
+  )
+  logger.info(`update files id: ${id} files: ${files}`)
+}
+
+export { getFileDialog, updateFiles }

@@ -1,10 +1,16 @@
 import logger from '../../logger'
 
 function writeFrontLog(args) {
-  if (args.level === 'error') {
-    logger.error(args.message)
-  } else {
-    logger.info(args.message)
+  switch (args.level) {
+    case 'error':
+      logger.error(args.message)
+      break
+    case 'warn':
+      logger.warn(args.message)
+      break
+    case 'info':
+      logger.info(args.message)
+      break
   }
 }
 

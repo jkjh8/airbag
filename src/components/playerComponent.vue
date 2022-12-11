@@ -1,7 +1,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { info, warn, error } from 'src/composables/useLogs'
 import { audioOutput } from 'src/composables/useDevices.js'
-import { player } from 'src/composables/usePlayer.js'
+import { player, updateFileToDb } from 'src/composables/usePlayer.js'
 
 const props = defineProps({
   id: Number
@@ -10,43 +11,66 @@ const props = defineProps({
 const name = ['Light', 'Touch', 'Fill']
 const audio = ref([])
 const status = ref([false, false, false])
+const files = ref(['', '', ''])
+const playlink = ref(false)
 const deviceId = ref(null)
 
-const audioPlay = (index) => {
+const audioPlay = (idx) => {
   try {
-    if (audio.value[index].readyState < 2) {
-      return FN.onRequest({
-        type: 'log',
-        level: 'warn',
-        message: `player id: ${id.value}, index: ${index} id not ready`
-      })
+    if (audio.value[idx].readyState < 2) {
+      return warn(`player id: ${props.id}, idx: ${idx} id not ready`)
     }
-    if (status.value[index]) {
-      audio.value[index].pause()
-      audio.value[index].load()
+    if (status.value[idx]) {
+      audio.value[idx].pause()
+      audio.value[idx].load()
     } else {
-      audio.value[index].play()
+      audio.value[idx].play()
     }
-    status.value[index] = !status.value[index]
+    status.value[idx] = !status.value[idx]
   } catch (err) {
-    status.value[index] = false
+    status.value[idx] = false
+    error(`player id: ${props.id}, idx: ${idx} play error`)
   }
 }
 
 const setDevice = () => {
-  for (let i = 0; i < 3; i++) {
-    audio.value[i].setSinkId(player.value[props.id].deviceId)
-  }
+  setSink()
   FN.onRequest({
     command: 'setDevice',
     id: props.id,
-    deviceId: player.value[props.id].deviceId
+    deviceId: deviceId.value
   })
 }
 
-onMounted(() => {
+const openFile = async (idx) => {
+  files.value[idx] = await FN.onPromise({ command: 'getFilePath' })
+  audio.value[idx].src = `local://${files.value[idx]}`
+  updateFileToDb(props.id, files.value)
+}
+
+const setSink = () => {
   for (let i = 0; i < 3; i++) {
-    audio.value[i].setSinkId(player.value[props.id].deviceId)
+    audio.value[i].setSinkId(deviceId.value)
+  }
+}
+onMounted(async () => {
+  try {
+    const value = await FN.onPromise({ command: 'getPlayer', id: props.id })
+    if (value.files && value.files.length) {
+      value.files.forEach((file, idx) => {
+        files.value[idx] = file
+        audio.value[idx].src = `local://${file}`
+      })
+    }
+    if (value.deviceId) {
+      deviceId.value = value.deviceId
+      setSink()
+    }
+    if (value.playlink) {
+      playlink.value = true
+    }
+  } catch (err) {
+    error(`Player is not activated ${err}`)
   }
 })
 </script>
@@ -57,18 +81,18 @@ onMounted(() => {
       <q-avatar round color="primary">{{ id + 1 }}</q-avatar>
     </q-item-section>
     <q-item-section>
-      <div class="q-gutter-y-sm">
+      <div>
         <!-- list for -->
         <div
-          v-for="(file, index) in player[id].files"
+          v-for="(file, index) in files"
           :key="index"
           class="row no-wrap justify-between items-center"
         >
-          <div>
-            <q-item-label>{{ name[index] }}</q-item-label>
-            <q-item-label caption>
+          <div class="row no-wrap items-center q-gutter-x-md">
+            <div>{{ name[index] }}</div>
+            <div class="text-grey" style="font-size: 0.7rem">
               {{ file }}
-            </q-item-label>
+            </div>
           </div>
           <div class="q-gutter-x-sm">
             <q-btn
@@ -79,27 +103,30 @@ onMounted(() => {
               :icon="status[index] ? 'stop' : 'play_arrow'"
               @click="audioPlay(index)"
             ></q-btn>
-            <q-btn round flat color="yellow" size="sm" icon="folder"></q-btn>
+            <q-btn
+              round
+              flat
+              color="yellow"
+              size="sm"
+              icon="folder"
+              @click="openFile(index)"
+            ></q-btn>
           </div>
           <!-- audio tag -->
-          <audio
-            ref="audio"
-            :src="`local://${file}`"
-            @ended="status[index] = false"
-          />
+          <audio ref="audio" controls @ended="status[index] = false" />
         </div>
 
-        <q-separator />
+        <q-separator class="q-my-sm" />
 
         <!-- device selector -->
         <div>
           <q-select
-            v-model="player[id].deviceId"
+            v-model="deviceId"
             :options="audioOutput"
             label="Audio Output Device"
             dense
-            options-dense
             filled
+            hide-bottom-space
             option-value="deviceId"
             option-label="label"
             emit-value
@@ -110,7 +137,7 @@ onMounted(() => {
       </div>
     </q-item-section>
     <q-item-section side>
-      <q-btn :color="player[id].playlink ? 'primary' : 'grey-10'">LINK</q-btn>
+      <q-btn :color="playlink ? 'primary' : 'grey-10'">LINK</q-btn>
     </q-item-section>
   </q-item>
 </template>

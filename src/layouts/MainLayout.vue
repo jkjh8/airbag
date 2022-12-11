@@ -3,7 +3,7 @@ import { onBeforeMount, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { getDevices } from 'src/composables/useDevices.js'
 import { updateSetup } from 'src/composables/useSetup.js'
-import { updatePlayer } from 'src/composables/usePlayer.js'
+// import { updatePlayer } from 'src/composables/usePlayer.js'
 import ControlBtns from 'src/components/ControlBtns.vue'
 import AboutWindow from 'src/components/dialogs/aboutDialog.vue'
 
@@ -13,22 +13,8 @@ $q.dark.set(true)
 
 onBeforeMount(async () => {
   await getDevices()
-  updatePlayer(await FN.onPromise({ command: 'getPlayer' }))
-  FN.onResponse((args) => {
-    switch (args.type) {
-      case 'setup':
-        updateSetup(args.value)
-        break
-      default:
-        FN.onRequest({
-          command: 'log',
-          level: 'info',
-          message: 'unknown message from backend'
-        })
-        break
-    }
-  })
-  FN.onRequest({ command: 'start' })
+  updateSetup(await FN.onPromise({ command: 'start' }))
+  // updatePlayer(await FN.onPromise({ command: 'getPlayer' }))
 })
 </script>
 

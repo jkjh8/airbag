@@ -7,21 +7,13 @@ import { setDevice } from './functions/devices'
 import { updatePlayer, getPlayer } from './functions/player'
 import { createServer } from '../net/udp'
 import db from '../db'
+import { getFileDialog, updateFiles } from './functions/files'
 
 let setup
 
 ipcMain.on('onRequest', async (e, args) => {
   try {
     switch (args.command) {
-      // STARTING
-      case 'start':
-        setup = await getSetupFromDB()
-        try {
-          await createServer(setup.port)
-        } catch (err) {
-          logger.error(`server creation failed: ${err}`)
-        }
-        break
       // LOG MESSAGE FROM FRONTEND
       case 'log':
         writeFrontLog(args)
@@ -46,17 +38,8 @@ ipcMain.on('onRequest', async (e, args) => {
         await setDevice(args)
         break
       // GET AUDIO FILE PATH
-      case 'getFilePath':
-        console.log(
-          dialog.showOpenDialogSync({
-            title: 'Select Audio File',
-            filters: [
-              { name: 'Audio', extensions: ['wav', 'mp3'] },
-              { name: 'All Files', extensions: ['*'] }
-            ],
-            properties: ['openFile']
-          })
-        )
+      case 'updateFiles':
+        await updateFiles(args.id, args.files)
         break
       default:
         logger.info(args)
@@ -68,7 +51,25 @@ ipcMain.on('onRequest', async (e, args) => {
 })
 
 ipcMain.handle('onPromise', async (e, args) => {
-  if (args.command === 'getPlayer') {
-    return await getPlayer()
+  console.log(args)
+  let rt
+  switch (args.command) {
+    case 'start':
+      setup = await getSetupFromDB()
+      rt = setup
+      try {
+        createServer(setup.port)
+      } catch (err) {
+        logger.error(`server creation failed: ${err}`)
+      }
+      break
+    case 'getPlayer':
+      rt = await getPlayer(args.id)
+      break
+    case 'getFilePath':
+      rt = await getFileDialog()
+      break
   }
+
+  return rt
 })

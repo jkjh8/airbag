@@ -9,12 +9,12 @@ export const updatePlayer = async (args) => {
   )
 }
 
-export const getPlayer = async () => {
+export const getPlayer = async (id) => {
+  return await db.findOne({ type: 'player', id: id }).sort({ id: 1 })
+}
+
+export const getPlayers = async () => {
   return await db.find({ type: 'player' }).sort({ id: 1 })
-  bw.fromId(1).webContents.send('onResponse', {
-    type: 'player',
-    value: players
-  })
 }
 
 // db.remove({}, { multi: true }, function (err, result) {
