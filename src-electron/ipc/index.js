@@ -54,7 +54,6 @@ ipcMain.on('onRequest', async (e, args) => {
 })
 
 ipcMain.handle('onPromise', async (e, args) => {
-  console.log(args)
   let rt
   switch (args.command) {
     case 'start':

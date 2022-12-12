@@ -18,4 +18,14 @@ const updatePlaylinkToDb = (id, playlink) => {
   FN.onRequest({ command: 'updatePlaylink', id: id, playlink: playlink })
 }
 
-export { player, updateFileToDb, updatePlaylinkToDb }
+const setSink = (audio, device) => {
+  audio.forEach((ad) => {
+    ad.setSinkId(device)
+  })
+}
+
+const updateDeviceToDb = (id, device) => {
+  FN.onRequest({ command: 'setDevice', id: id, deviceId: device })
+}
+
+export { player, updateFileToDb, updatePlaylinkToDb, setSink, updateDeviceToDb }

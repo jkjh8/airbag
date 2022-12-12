@@ -2,24 +2,28 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { info, warn, error } from 'src/composables/useLogs'
 import { audioOutput } from 'src/composables/useDevices.js'
+import { setup } from 'src/composables/useSetup'
 import {
   player,
   updateFileToDb,
-  updatePlaylinkToDb
+  updatePlaylinkToDb,
+  updateDeviceToDb,
+  setSink
 } from 'src/composables/usePlayer.js'
 
 const props = defineProps({
   id: Number
 })
 
-const name = ['Light', 'Touch', 'Fill']
+const name = ['Light', 'Breathing', 'Refill']
 const audio = ref([])
 const status = ref([false, false, false])
 const files = ref(['', '', ''])
 const playlink = ref(false)
 const deviceId = ref(null)
+let delayedPlay
 
-const audioPlay = (idx) => {
+const play = (idx) => {
   try {
     if (audio.value[idx].readyState < 2) {
       return warn(`player id: ${props.id}, idx: ${idx} id not ready`)
@@ -29,6 +33,9 @@ const audioPlay = (idx) => {
       audio.value[idx].load()
     } else {
       audio.value[idx].play()
+      if (idx === 1 && playlink.value) {
+        delayPlay()
+      }
     }
     status.value[idx] = !status.value[idx]
   } catch (err) {
@@ -36,6 +43,24 @@ const audioPlay = (idx) => {
     error(`player id: ${props.id}, idx: ${idx} play error`)
   }
 }
+
+const stop = () => {
+  audio.value.forEach((ad) => {
+    ad.pause()
+    ad.load()
+  })
+}
+
+const playing = (e, idx) => {
+  status.value[idx] = true
+}
+
+const delayPlay = () => {
+  delayedPlay = setTimeout(() => {
+    audio.value[2].play()
+  }, setup.value.delay)
+}
+
 const openFile = async (idx) => {
   files.value[idx] = await FN.onPromise({ command: 'getFilePath' })
   audio.value[idx].src = `local://${files.value[idx]}`
@@ -43,18 +68,8 @@ const openFile = async (idx) => {
 }
 
 const setDevice = () => {
-  setSink()
-  FN.onRequest({
-    command: 'setDevice',
-    id: props.id,
-    deviceId: deviceId.value
-  })
-}
-
-const setSink = () => {
-  for (let i = 0; i < 3; i++) {
-    audio.value[i].setSinkId(deviceId.value)
-  }
+  setSink(audio.value, deviceId.value)
+  updateDeviceToDb(props.id, deviceId.value)
 }
 
 const setPlaylink = () => {
@@ -72,7 +87,7 @@ onMounted(async () => {
     }
     if (value.deviceId) {
       deviceId.value = value.deviceId
-      setSink()
+      setSink(audio.value, deviceId.value)
     }
     if (value.playlink) {
       playlink.value = true
@@ -109,7 +124,7 @@ onMounted(async () => {
               size="sm"
               :color="status[index] ? 'red' : 'green'"
               :icon="status[index] ? 'stop' : 'play_arrow'"
-              @click="audioPlay(index)"
+              @click="play(index)"
             ></q-btn>
             <q-btn
               round
@@ -121,7 +136,11 @@ onMounted(async () => {
             ></q-btn>
           </div>
           <!-- audio tag -->
-          <audio ref="audio" @ended="status[index] = false" />
+          <audio
+            ref="audio"
+            @playing="playing($event, index)"
+            @ended="status[index] = false"
+          />
         </div>
 
         <q-separator class="q-my-sm" />
