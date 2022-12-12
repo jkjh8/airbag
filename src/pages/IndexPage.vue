@@ -1,9 +1,22 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import PlayerComponent from '/src/components/playerComponent'
 import { player } from 'src/composables/usePlayer.js'
 
 const audioplayer = ref([])
+const audioplayer1 = ref(null)
+onMounted(() => {
+  FN.onResponse((args) => {
+    switch (args.command) {
+      case 'play':
+        if (args.comm === 1) {
+          audioplayer.value[args.id].playSingle(args.channel)
+        } else {
+          audioplayer.value[args.id].remotePlay(args.channel)
+        }
+    }
+  })
+})
 </script>
 
 <template>

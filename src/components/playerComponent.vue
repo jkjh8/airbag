@@ -31,14 +31,41 @@ const play = (idx) => {
     if (status.value[idx]) {
       audio.value[idx].pause()
       audio.value[idx].load()
+      status.value[idx] = false
     } else {
       audio.value[idx].play()
       if (idx === 1 && playlink.value) {
         delayPlay()
       }
     }
-    status.value[idx] = !status.value[idx]
   } catch (err) {
+    status.value[idx] = false
+    error(`player id: ${props.id}, idx: ${idx} play error`)
+  }
+}
+
+const remotePlay = (idx) => {
+  try {
+    if (audio.value[idx].readyState < 2) {
+      return warn(`player id: ${props.id}, idx: ${idx} id not ready`)
+    }
+    audio.value[idx].play()
+    if (idx == 1 && playlink.value) {
+      delayPlay()
+    }
+  } catch (err) {
+    status.value[idx] = false
+    error(`player id: ${props.id}, idx: ${idx} play error`)
+  }
+}
+
+const playSingle = (idx) => {
+  try {
+    if (audio.value[idx].readyState < 2) {
+      return warn(`player id: ${props.id}, idx: ${idx} id not ready`)
+    }
+    audio.value[idx].play()
+  } catch (error) {
     status.value[idx] = false
     error(`player id: ${props.id}, idx: ${idx} play error`)
   }
@@ -95,6 +122,13 @@ onMounted(async () => {
   } catch (err) {
     error(`Player is not activated ${err}`)
   }
+})
+
+defineExpose({
+  play,
+  remotePlay,
+  playSingle,
+  stop
 })
 </script>
 

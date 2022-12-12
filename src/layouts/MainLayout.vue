@@ -3,7 +3,6 @@ import { onBeforeMount, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { getDevices } from 'src/composables/useDevices.js'
 import { updateSetup } from 'src/composables/useSetup.js'
-// import { updatePlayer } from 'src/composables/usePlayer.js'
 import ControlBtns from 'src/components/ControlBtns.vue'
 import AboutWindow from 'src/components/dialogs/aboutDialog.vue'
 
@@ -14,7 +13,6 @@ $q.dark.set(true)
 onBeforeMount(async () => {
   await getDevices()
   updateSetup(await FN.onPromise({ command: 'start' }))
-  // updatePlayer(await FN.onPromise({ command: 'getPlayer' }))
 })
 </script>
 

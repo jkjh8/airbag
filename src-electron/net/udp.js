@@ -25,7 +25,15 @@ const createServer = (port) => {
 
       server.on('message', (msg) => {
         // 차후 수정
-        console.log(msg)
+        const command = msg.toString().split('/')
+        if (command.length === 3) {
+          bw.fromId(1).webContents.send('onResponse', {
+            command: 'play',
+            id: Number(command[0]),
+            comm: Number(command[1]),
+            channel: Number(command[2])
+          })
+        }
       })
 
       server.on('error', (err) => {
