@@ -49,6 +49,7 @@ const remotePlay = (idx) => {
     if (audio.value[idx].readyState < 2) {
       return warn(`player id: ${props.id}, idx: ${idx} id not ready`)
     }
+    audio.value[idx].load()
     audio.value[idx].play()
     if (idx == 1 && playlink.value) {
       delayPlay()
@@ -84,6 +85,7 @@ const playing = (e, idx) => {
 
 const delayPlay = () => {
   delayedPlay = setTimeout(() => {
+    audio.value[2].load()
     audio.value[2].play()
   }, setup.value.delay)
 }
