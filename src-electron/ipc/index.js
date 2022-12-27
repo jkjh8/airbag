@@ -6,6 +6,7 @@ import { getSetupFromDB, setSetupToDB } from './functions/setup'
 import { setDevice } from './functions/devices'
 import { updatePlayer, getPlayer, updatePlaylink } from './functions/player'
 import { createServer } from '../net/udp'
+import { createOscServer, sednBundle } from '../osc'
 import db from '../db'
 import { getFileDialog, updateFiles } from './functions/files'
 
@@ -60,7 +61,9 @@ ipcMain.handle('onPromise', async (e, args) => {
       setup = await getSetupFromDB()
       rt = setup
       try {
-        createServer(setup.port)
+        // createServer(setup.port)
+        await createOscServer(setup.port)
+        sednBundle()
       } catch (err) {
         logger.error(`server creation failed: ${err}`)
       }
