@@ -200,7 +200,10 @@ defineExpose({
       </div>
     </q-item-section>
     <q-item-section side>
-      <q-btn :color="playlink ? 'primary' : 'grey-10'" @click="setPlaylink"
+      <q-btn
+        rounded
+        :color="playlink ? 'primary' : 'grey-10'"
+        @click="setPlaylink"
         >LINK</q-btn
       >
     </q-item-section>
