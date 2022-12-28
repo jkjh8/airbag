@@ -1,3 +1,4 @@
+import { BrowserWindow as bw } from 'electron'
 import osc from 'osc'
 var udpPort
 
@@ -11,9 +12,9 @@ const createOscServer = (port) => {
       })
 
       udpPort.on('message', function (oscMsg, timeTag, info) {
-        console.log('OSC Arrived: ', oscMsg)
-        console.log('OSC TimeTag: ', timeTag)
-        console.log('OSC Info: ', info)
+        // console.log('OSC Arrived: ', oscMsg)
+        // console.log('OSC TimeTag: ', timeTag)
+        // console.log('OSC Info: ', info)
         oscParser(oscMsg, timeTag, info)
       })
 
@@ -42,9 +43,18 @@ const sednBundle = () => {
 }
 
 const oscParser = (oscMsg, timeTag, info) => {
+  let channel
+  const id = oscMsg.args[0].value - 1
   if (oscMsg.address === '/AirbagLightingEvent') {
-    console.log(oscMsg.args)
+    channel = 0
+  } else if (oscMsg.address === '/AirbagBreathingEvent') {
+    channel = 1
   }
+  bw.fromId(1).webContents.send('onResponse', {
+    command: 'play',
+    id: id,
+    channel: channel
+  })
 }
 
 export { createOscServer, sednBundle }

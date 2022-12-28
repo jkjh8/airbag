@@ -7,6 +7,7 @@ const audioplayer = ref([])
 const audioplayer1 = ref(null)
 onMounted(() => {
   FN.onResponse((args) => {
+    console.log(args)
     switch (args.command) {
       case 'play':
         if (args.comm === 1) {
