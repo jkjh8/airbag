@@ -13,6 +13,14 @@ $q.dark.set(true)
 onBeforeMount(async () => {
   await getDevices()
   updateSetup(await FN.onPromise({ command: 'start' }))
+
+  FN.onResponse((args) => {
+    if (args.command === 'about') {
+      $q.dialog({
+        component: AboutWindow
+      })
+    }
+  })
 })
 </script>
 

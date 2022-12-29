@@ -1,7 +1,8 @@
-import { app, BrowserWindow, nativeTheme, protocol } from 'electron'
+import { app, Menu, BrowserWindow, nativeTheme, protocol } from 'electron'
 import path from 'path'
 import os from 'os'
 import logger from './logger'
+import menu from './menu'
 import ipc from './ipc'
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -47,6 +48,8 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  Menu.setApplicationMenu(menu)
 }
 
 app.on('ready', () => {

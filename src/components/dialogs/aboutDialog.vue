@@ -13,16 +13,11 @@ const { dialogRef, onDialogOK, onDialogCancel } = useDialogPluginComponent()
     <q-card class="q-dialog-plugin confirmDialog">
       <q-card-section>
         <div class="row no-wrap justify-center q-pt-md">
-          <q-icon name="svguse:icons.svg#logo" size="100px" />
+          <q-avatar color="green" size="100px">A</q-avatar>
         </div>
-        <div class="column items-center">
+        <div class="column items-center q-pt-md">
           <div>{{ info.productName }} {{ info.version }}</div>
           <div>{{ info.author }}</div>
-        </div>
-      </q-card-section>
-      <q-card-section>
-        <div class="row justify-center">
-          <div>Muticast Address: 230.185.185.112:56432</div>
         </div>
       </q-card-section>
     </q-card>
