@@ -59,10 +59,13 @@ ipcMain.handle('onPromise', async (e, args) => {
   switch (args.command) {
     case 'start':
       setup = await getSetupFromDB()
+      if (setup && setup.port) {
+      }
       rt = setup
       try {
         // createServer(setup.port)
-        if (setup.port) {
+        if (setup && setup.port) {
+          setup
           await createOscServer(setup.port)
         } else {
           await createOscServer(12345)
