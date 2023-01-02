@@ -1,5 +1,6 @@
 import { BrowserWindow as bw } from 'electron'
 import osc from 'osc'
+import logger from '../logger'
 var udpPort
 
 const createOscServer = (port) => {
@@ -19,8 +20,10 @@ const createOscServer = (port) => {
       })
 
       udpPort.open()
+      logger.info(`OSC Server Started : ${port}`)
       resolve()
     } catch (err) {
+      logger.error(`OSC Server Error: ${err}`)
       reject(err)
     }
   })
@@ -50,10 +53,11 @@ const oscParser = (oscMsg, timeTag, info) => {
   } else if (oscMsg.address === '/AirbagBreathingEvent') {
     channel = 1
   }
-  bw.fromId(1).webContents.send('onResponse', {
+  bw.fromId(1).webContents.send('onOsc', {
     command: 'play',
     id: id,
-    channel: channel
+    channel: channel,
+    oscMsg: oscMsg
   })
 }
 

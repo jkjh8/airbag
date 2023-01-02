@@ -3,7 +3,7 @@ import { dialog } from 'electron'
 import logger from '../../logger'
 
 const getFileDialog = async () => {
-  const file = dialog.showOpenDialogSync({
+  return dialog.showOpenDialogSync({
     title: 'Select Audio File',
     filters: [
       { name: 'Audio', extensions: ['wav', 'mp3'] },
@@ -11,7 +11,6 @@ const getFileDialog = async () => {
     ],
     properties: ['openFile']
   })
-  return file[0]
 }
 
 const updateFiles = async (id, files) => {

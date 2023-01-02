@@ -2,12 +2,13 @@
 import { ref, onMounted } from 'vue'
 import PlayerComponent from '/src/components/playerComponent'
 import { player } from 'src/composables/usePlayer.js'
+import { oscMsg } from 'src/composables/useOsc'
 
 const audioplayer = ref([])
 const audioplayer1 = ref(null)
 onMounted(() => {
-  FN.onResponse((args) => {
-    console.log(args)
+  FN.onOsc((args) => {
+    oscMsg.value = args
     switch (args.command) {
       case 'play':
         if (args.comm === 1) {

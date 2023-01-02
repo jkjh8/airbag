@@ -5,6 +5,7 @@ import { getDevices } from 'src/composables/useDevices.js'
 import { updateSetup } from 'src/composables/useSetup.js'
 import ControlBtns from 'src/components/ControlBtns.vue'
 import AboutWindow from 'src/components/dialogs/aboutDialog.vue'
+import OscWindow from 'src/components/dialogs/oscMsgDialog.vue'
 
 const $q = useQuasar()
 
@@ -15,10 +16,16 @@ onBeforeMount(async () => {
   updateSetup(await FN.onPromise({ command: 'start' }))
 
   FN.onResponse((args) => {
-    if (args.command === 'about') {
-      $q.dialog({
-        component: AboutWindow
-      })
+    switch (args.command) {
+      case 'about':
+        $q.dialog({
+          component: AboutWindow
+        })
+        break
+      case 'osc':
+        $q.dialog({
+          component: OscWindow
+        })
     }
   })
 })

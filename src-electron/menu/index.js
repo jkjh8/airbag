@@ -4,6 +4,13 @@ const template = [
     label: 'Help',
     submenu: [
       {
+        label: 'OSC Viewer',
+        accelerator: 'CmdOrCtrl+d',
+        click: () => {
+          bw.fromId(1).webContents.send('onResponse', { command: 'osc' })
+        }
+      },
+      {
         label: 'About',
         accelerator: 'F1',
         click: () => {

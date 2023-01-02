@@ -91,9 +91,13 @@ const delayPlay = () => {
 }
 
 const openFile = async (idx) => {
-  files.value[idx] = await FN.onPromise({ command: 'getFilePath' })
-  audio.value[idx].src = `local://${files.value[idx]}`
-  updateFileToDb(props.id, files.value)
+  const file = await FN.onPromise({ command: 'getFilePath' })
+  if (file) {
+    files.value[idx] = file[0]
+    audio.value[idx].src = `local://${files.value[idx]}`
+    updateFileToDb(props.id, files.value)
+  }
+  // files.value[idx] = await FN.onPromise({ command: 'getFilePath' })
 }
 
 const setDevice = () => {
@@ -110,8 +114,10 @@ onMounted(async () => {
     const value = await FN.onPromise({ command: 'getPlayer', id: props.id })
     if (value.files && value.files.length) {
       value.files.forEach((file, idx) => {
-        files.value[idx] = file
-        audio.value[idx].src = `local://${file}`
+        if (file) {
+          files.value[idx] = file
+          audio.value[idx].src = `local://${file}`
+        }
       })
     }
     if (value.deviceId) {
