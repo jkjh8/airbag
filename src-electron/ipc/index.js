@@ -62,8 +62,12 @@ ipcMain.handle('onPromise', async (e, args) => {
       rt = setup
       try {
         // createServer(setup.port)
-        await createOscServer(setup.port ?? 12345)
-        sednBundle()
+        if (setup.port) {
+          await createOscServer(setup.port)
+        } else {
+          await createOscServer(12345)
+        }
+        // sednBundle()
       } catch (err) {
         logger.error(`server creation failed: ${err}`)
       }
