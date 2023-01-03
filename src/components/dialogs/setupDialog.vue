@@ -47,6 +47,15 @@ const onSubmit = () => {
               :rules="[required, minPort]"
               label="Delay"
             />
+            <q-select
+              v-model="setup.mode"
+              :options="['Simple', 'Advanced']"
+              filled
+              dense
+              lazy-rules
+              :rules="[required]"
+              label="Delay"
+            />
           </div>
         </q-card-section>
 

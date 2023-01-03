@@ -8,8 +8,16 @@ import {
   updateFileToDb,
   updatePlaylinkToDb,
   updateDeviceToDb,
-  setSink
+  setSink,
+  setAudioFiles,
+  initAudioTags,
+  fnPlayBtn,
+  isPlaying,
+  fnRemotePlay
 } from 'src/composables/usePlayer.js'
+
+import Simple from 'src/components/SimplePlayer'
+import Advenced from 'src/components/AdvencedPlayer'
 
 const props = defineProps({
   id: Number
@@ -24,52 +32,12 @@ const deviceId = ref(null)
 let delayedPlay
 
 const play = (idx) => {
-  try {
-    if (audio.value[idx].readyState < 2) {
-      return warn(`player id: ${props.id}, idx: ${idx} id not ready`)
-    }
-    if (status.value[idx]) {
-      audio.value[idx].pause()
-      audio.value[idx].load()
-      status.value[idx] = false
-    } else {
-      audio.value[idx].play()
-      if (idx === 1 && playlink.value) {
-        delayPlay()
-      }
-    }
-  } catch (err) {
-    status.value[idx] = false
-    error(`player id: ${props.id}, idx: ${idx} play error`)
-  }
+  console.log(idx)
+  status.value[idx] = fnPlayBtn(audio.value, props.id, idx, playlink.value)
 }
 
 const remotePlay = (idx) => {
-  try {
-    if (audio.value[idx].readyState < 2) {
-      return warn(`player id: ${props.id}, idx: ${idx} id not ready`)
-    }
-    audio.value[idx].load()
-    audio.value[idx].play()
-    if (idx == 1 && playlink.value) {
-      delayPlay()
-    }
-  } catch (err) {
-    status.value[idx] = false
-    error(`player id: ${props.id}, idx: ${idx} play error`)
-  }
-}
-
-const playSingle = (idx) => {
-  try {
-    if (audio.value[idx].readyState < 2) {
-      return warn(`player id: ${props.id}, idx: ${idx} id not ready`)
-    }
-    audio.value[idx].play()
-  } catch (error) {
-    status.value[idx] = false
-    error(`player id: ${props.id}, idx: ${idx} play error`)
-  }
+  status.value[idx] = fnRemotePlay(audio.value, props.id, idx, playlink.value)
 }
 
 const stop = () => {
@@ -81,13 +49,6 @@ const stop = () => {
 
 const playing = (e, idx) => {
   status.value[idx] = true
-}
-
-const delayPlay = () => {
-  delayedPlay = setTimeout(() => {
-    audio.value[2].load()
-    audio.value[2].play()
-  }, setup.value.delay)
 }
 
 const openFile = async (idx) => {
@@ -109,24 +70,15 @@ const setPlaylink = () => {
   playlink.value = !playlink.value
   updatePlaylinkToDb(props.id, playlink.value)
 }
+
 onMounted(async () => {
   try {
-    const value = await FN.onPromise({ command: 'getPlayer', id: props.id })
-    if (value.files && value.files.length) {
-      value.files.forEach((file, idx) => {
-        if (file) {
-          files.value[idx] = file
-          audio.value[idx].src = `local://${file}`
-        }
-      })
-    }
-    if (value.deviceId) {
-      deviceId.value = value.deviceId
-      setSink(audio.value, deviceId.value)
-    }
-    if (value.playlink) {
-      playlink.value = true
-    }
+    const playerInfo = await initAudioTags(audio.value, props.id)
+    files.value = playerInfo.files
+    deviceId.value = playerInfo.deviceId
+    playlink.value = playerInfo.playlink === 'true' ? false : true
+    // loggger
+    info(`player ID: ${props.id} init value: ${playerInfo}`)
   } catch (err) {
     error(`Player is not activated ${err}`)
   }
@@ -135,7 +87,6 @@ onMounted(async () => {
 defineExpose({
   play,
   remotePlay,
-  playSingle,
   stop
 })
 </script>
@@ -146,6 +97,21 @@ defineExpose({
       <q-avatar round color="primary">{{ id + 1 }}</q-avatar>
     </q-item-section>
     <q-item-section>
+      <Simple
+        v-if="setup.mode === 'Simple'"
+        :name="name"
+        :status="status"
+        :files="files"
+        @playBtnEvent="play"
+      />
+      <Advenced
+        v-else
+        :name="name"
+        :status="status"
+        :files="files"
+        @playBtnEvent="play"
+        @openFile="openFile"
+      />
       <div>
         <!-- list for -->
         <div
@@ -153,31 +119,6 @@ defineExpose({
           :key="index"
           class="row no-wrap justify-between items-center"
         >
-          <div class="row no-wrap items-center q-gutter-x-md">
-            <div>{{ name[index] }}</div>
-            <div class="text-grey" style="font-size: 0.7rem">
-              {{ file }}
-            </div>
-          </div>
-          <div class="q-gutter-x-sm">
-            <q-btn
-              round
-              flat
-              size="sm"
-              :color="status[index] ? 'red' : 'green'"
-              :icon="status[index] ? 'stop' : 'play_arrow'"
-              @click="play(index)"
-            ></q-btn>
-            <q-btn
-              round
-              flat
-              color="yellow"
-              size="sm"
-              icon="folder"
-              @click="openFile(index)"
-            ></q-btn>
-          </div>
-          <!-- audio tag -->
           <audio
             ref="audio"
             @playing="playing($event, index)"

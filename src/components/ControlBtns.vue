@@ -34,21 +34,6 @@ const openFileDialog = () => {
     >
       <TooltipDelay msg="Setting" />
     </q-btn>
-
-    <!-- <q-btn
-      icon="folder"
-      color="yellow"
-      round
-      flat
-      dense
-      @click="openFileDialog"
-    >
-      <TooltipDelay msg="Audio Files" />
-    </q-btn>
-
-    <q-btn icon="devices" color="grey-4" round flat dense>
-      <TooltipDelay msg="Audio Device" />
-    </q-btn> -->
   </div>
 </template>
 

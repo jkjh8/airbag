@@ -210,6 +210,11 @@ module.exports = configure(function (ctx) {
         // https://www.electron.build/configuration/configuration
 
         appId: 'airbagsound',
+        extraResources: {
+          from: './audioFiles',
+          to: 'audioFiles',
+          filter: ['**/*']
+        },
         win: {
           target: {
             target: 'nsis',

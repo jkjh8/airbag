@@ -1,10 +1,17 @@
+import path from 'path'
+import fs from 'fs'
 import { BrowserWindow as bw, ipcMain, dialog } from 'electron'
 import logger from '../logger'
 
 import writeFrontLog from './functions/writeFrontendLog'
 import { getSetupFromDB, setSetupToDB } from './functions/setup'
 import { setDevice } from './functions/devices'
-import { updatePlayer, getPlayer, updatePlaylink } from './functions/player'
+import {
+  updatePlayer,
+  getPlayer,
+  updatePlaylink,
+  initAudioFiles
+} from './functions/player'
 import { createServer } from '../net/udp'
 import { createOscServer, sednBundle } from '../osc'
 import db from '../db'
@@ -58,18 +65,10 @@ ipcMain.handle('onPromise', async (e, args) => {
   let rt
   switch (args.command) {
     case 'start':
-      setup = await getSetupFromDB()
-      if (setup && setup.port) {
-      }
-      rt = setup
+      // console.log('start setup ', setup)
+      // console.log(fs.existsSync(setup.audioFilePath))
       try {
-        // createServer(setup.port)
-        if (setup && setup.port) {
-          setup
-          await createOscServer(setup.port)
-        } else {
-          await createOscServer(12345)
-        }
+        await createOscServer(setup.port)
         // sednBundle()
       } catch (err) {
         logger.error(`server creation failed: ${err}`)
@@ -77,6 +76,20 @@ ipcMain.handle('onPromise', async (e, args) => {
       break
     case 'getPlayer':
       rt = await getPlayer(args.id)
+      if (!rt) {
+        rt = {
+          id: args.id,
+          deviceId: 'default',
+          files: initAudioFiles(args.id, setup.audioFilePath)
+        }
+      }
+      if (rt && !rt.files) {
+        rt.files = initAudioFiles(args.id, setup.audioFilePath)
+      }
+      if (rt && !rt.deviceId) {
+        rt.deviceId = 'default'
+      }
+      console.log(rt)
       break
     case 'getFilePath':
       rt = await getFileDialog()
@@ -85,3 +98,10 @@ ipcMain.handle('onPromise', async (e, args) => {
 
   return rt
 })
+
+const getSetup = async () => {
+  setup = await getSetupFromDB()
+  console.log(setup)
+}
+
+getSetup()
